@@ -45,7 +45,7 @@ def fetch_crypto_data():
 
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
-#this module is not needed in vercel
-#if __name__ == "__main__":
-#    import uvicorn
-#    uvicorn.run(app, host="0.0.0.0", port=5000)
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
