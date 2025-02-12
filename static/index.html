@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Prices</title>
+    <script>
+        async function fetchCryptoData() {
+            try {
+                const response = await fetch("/crypto");
+                const data = await response.json();
+                let top5 = [...data].sort((a, b) => b.market_cap - a.market_cap).slice(0, 5);
+                document.getElementById("top5").innerText = "Top 5 Cryptocurrencies :  " + top5.map(c => c.name).join(", ");
+
+
+
+                let totalPrice = data.reduce((sum, crypto) => sum + crypto.price, 0);
+                let avgPrice = totalPrice / data.length;
+                document.getElementById("avg-price").innerText = `Average Price of Top 50 cryptos : $${avgPrice.toFixed(2)}`;
+
+
+
+                let highestChange = data.reduce((max, crypto) => (crypto.change_24h > max.change_24h ? crypto : max), data[0]);
+                let lowestChange = data.reduce((min, crypto) => (crypto.change_24h < min.change_24h ? crypto : min), data[0]);
+
+                document.getElementById("high-low-change").innerText =
+                    `24hour % Change: Highest - ${highestChange.name} (${highestChange.change_24h.toFixed(2)}%), ` +
+                    `Lowest - ${lowestChange.name} (${lowestChange.change_24h.toFixed(2)}%)`;
+
+                let tableBody = document.getElementById("crypto-table-body");
+                tableBody.innerHTML = "";
+
+                data.forEach(crypto => {
+                    let row = `
+                        <tr>
+                            <td>${crypto.name}</td>
+                            <td>${crypto.symbol}</td>
+                            <td>$${crypto.price.toFixed(2)}</td>
+                            <td>$${crypto.market_cap.toLocaleString()}</td>
+                            <td>$${crypto.volume_24h.toLocaleString()}</td>
+                            <td style="color: ${crypto.change_24h > 0 ? 'green' : 'red'};">
+                                ${crypto.change_24h.toFixed(2)}%
+                            </td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        }
+
+        setInterval(fetchCryptoData, 60000);
+        window.onload = fetchCryptoData;
+    </script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        table { width: 80%; margin: 20px auto; border-collapse: collapse; }
+        th, td { padding: 10px; border: 1px solid black; }
+        th { background-color: #4CAF50; color: white; }
+    </style>
+</head>
+<body>
+    <h1>Live Cryptocurrency Prices</h1>
+
+
+     <div class="stats">
+        <p id="top5">Top 5 Cryptos by Market Cap:</p>
+        <p id="avg-price">Average Price of Top 50:</p>
+        <p id="high-low-change">24h Change:</p>
+    </div>
+
+    
+    <table>
+        <tr>
+            <th>Cryptocurrency Name</th>
+            <th>Symbol</th>
+            <th>Current Price (in USD)</th>
+            <th>Market Capitalization</th>
+            <th>24-hour Trading Volume</th>
+            <th>Price Change (24-hour, percentage)</th>
+        </tr>
+        <tbody id="crypto-table-body"></tbody>
+    </table>
+</body>
+</html>
